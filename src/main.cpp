@@ -55,7 +55,7 @@ void mouseMoveCallback(GLFWwindow* window, double xPosition, double yPosition) {
     previousX = xPosition;
     previousY = yPosition;
   } else if (rightMouseDown) {
-    double deltaZ = static_cast<float>((previousY - yPosition) * 0.05);
+    float deltaZ = static_cast<float>((previousY - yPosition) * 0.05);
 
     camera->UpdateOrbit(0.0f, 0.0f, deltaZ);
 
