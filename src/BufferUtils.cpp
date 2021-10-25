@@ -1,5 +1,7 @@
 #include "BufferUtils.h"
 
+#include <cstring>
+
 #include "Instance.h"
 
 void BufferUtils::CreateBuffer(Device* device, VkDeviceSize size,
