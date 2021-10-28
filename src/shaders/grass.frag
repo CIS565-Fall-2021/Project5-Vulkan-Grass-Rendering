@@ -14,4 +14,4 @@ void main() {
     // TODO: Compute fragment color
 
     outColor = vec4(1.0);
-}
+} 
