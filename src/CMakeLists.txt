@@ -11,6 +11,8 @@ foreach(IMAGE ${IMAGES})
     configure_file(${IMAGE} ${CMAKE_CURRENT_BINARY_DIR}/images/${fname} COPYONLY)
 endforeach()
 
+find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{VK_SDK_PATH}/Bin/ $ENV{VK_SDK_PATH}/Bin32/)
+
 file(GLOB_RECURSE SHADER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/*.vert
     ${CMAKE_CURRENT_SOURCE_DIR}/*.frag
@@ -33,18 +35,14 @@ endif(WIN32)
 foreach(SHADER_SOURCE ${SHADER_SOURCES})
     set(SHADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/shaders)
 
-    if(WIN32)
-        get_filename_component(fname ${SHADER_SOURCE} NAME)
-        add_custom_target(${fname}.spv
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_DIR} && 
-            $ENV{VK_SDK_PATH}/Bin/glslangValidator.exe -V ${SHADER_SOURCE} -o ${SHADER_DIR}/${fname}.spv
-            SOURCES ${SHADER_SOURCE}
-        )
-        ExternalTarget("Shaders" ${fname}.spv)
-        add_dependencies(vulkan_grass_rendering ${fname}.spv)
-    endif(WIN32)
-
-    # TODO: Build shaders on not windows
+    get_filename_component(fname ${SHADER_SOURCE} NAME)
+    add_custom_target(${fname}.spv
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_DIR} && 
+        ${GLSL_VALIDATOR} -V ${SHADER_SOURCE} -o ${SHADER_DIR}/${fname}.spv
+        SOURCES ${SHADER_SOURCE}
+    )
+    ExternalTarget("Shaders" ${fname}.spv)
+    add_dependencies(vulkan_grass_rendering ${fname}.spv)
 endforeach()
 
 target_link_libraries(vulkan_grass_rendering ${ASSIMP_LIBRARIES} Vulkan::Vulkan glfw)
