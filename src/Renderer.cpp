@@ -254,7 +254,7 @@ void Renderer::CreateDescriptorPool() {
 }
 
 void Renderer::CreateCameraDescriptorSet() {
-  // Describe the desciptor set
+  // Describe the descriptor set
   VkDescriptorSetLayout layouts[]       = {cameraDescriptorSetLayout};
   VkDescriptorSetAllocateInfo allocInfo = {};
   allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -294,7 +294,7 @@ void Renderer::CreateCameraDescriptorSet() {
 void Renderer::CreateModelDescriptorSets() {
   modelDescriptorSets.resize(scene->GetModels().size());
 
-  // Describe the desciptor set
+  // Describe the descriptor set
   VkDescriptorSetLayout layouts[]       = {modelDescriptorSetLayout};
   VkDescriptorSetAllocateInfo allocInfo = {};
   allocInfo.sType          = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -358,7 +358,7 @@ void Renderer::CreateGrassDescriptorSets() {
 }
 
 void Renderer::CreateTimeDescriptorSet() {
-  // Describe the desciptor set
+  // Describe the descriptor set
   VkDescriptorSetLayout layouts[]       = {timeDescriptorSetLayout};
   VkDescriptorSetAllocateInfo allocInfo = {};
   allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
