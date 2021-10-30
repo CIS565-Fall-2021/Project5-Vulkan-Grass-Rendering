@@ -21,7 +21,7 @@ The simulation is based on this [paper].
 
 ## Physics Features
 
-Three force simulations are implemented.
+Three force simulations are implemented. With no force, grass is rendered as a up-standing triangle with second degree Bezier curves.
 | No Force | w/ Gravity | 
 | ----------- | ----------- | 
 | ![](img/no_force.png) | ![](img/g_.png) |
