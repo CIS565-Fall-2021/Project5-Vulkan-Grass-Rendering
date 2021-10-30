@@ -24,11 +24,11 @@ The simulation is based on this [paper].
 Three force simulations are implemented:
 | No Force | w/ Gravity | 
 | ----------- | ----------- | 
-| ![](img/no_force.gif) | ![](img/g.gif) |
+| ![](img/no_force.png) | ![](img/g.png) |
 
 | w/ Gravity & Recovery | w/ Gravity & Recovery & Wind |
 | ----------- | ----------- | 
-| ![](img/gr.gif) | ![](img/grw.gif) |
+| ![](img/gr.png) | ![](img/grw.png) |
 
 ## Optimization Features
 
