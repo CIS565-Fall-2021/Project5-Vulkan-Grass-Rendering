@@ -5,10 +5,11 @@
 #include "Scene.h"
 #include "Camera.h"
 
-class Renderer {
+class Renderer
+{
 public:
     Renderer() = delete;
-    Renderer(Device* device, SwapChain* swapChain, Scene* scene, Camera* camera);
+    Renderer(Device *device, SwapChain *swapChain, Scene *scene, Camera *camera);
     ~Renderer();
 
     void CreateCommandPools();
@@ -42,11 +43,11 @@ public:
     void Frame();
 
 private:
-    Device* device;
+    Device *device;
     VkDevice logicalDevice;
-    SwapChain* swapChain;
-    Scene* scene;
-    Camera* camera;
+    SwapChain *swapChain;
+    Scene *scene;
+    Camera *camera;
 
     VkCommandPool graphicsCommandPool;
     VkCommandPool computeCommandPool;
@@ -56,11 +57,12 @@ private:
     VkDescriptorSetLayout cameraDescriptorSetLayout;
     VkDescriptorSetLayout modelDescriptorSetLayout;
     VkDescriptorSetLayout timeDescriptorSetLayout;
-    
+
     VkDescriptorPool descriptorPool;
 
     VkDescriptorSet cameraDescriptorSet;
     std::vector<VkDescriptorSet> modelDescriptorSets;
+    std::vector<VkDescriptorSet> grassDescriptorSets;
     VkDescriptorSet timeDescriptorSet;
 
     VkPipelineLayout graphicsPipelineLayout;
