@@ -21,7 +21,7 @@ The simulation is based on this [paper].
 
 ## Physics Features
 
-Three force simulations are implemented:
+Three force simulations are implemented.
 | No Force | w/ Gravity | 
 | ----------- | ----------- | 
 | ![](img/no_force.png) | ![](img/g_.png) |
@@ -31,6 +31,11 @@ Three force simulations are implemented:
 | ![](img/gr_.png) | ![](img/grw_.png) |
 
 ## Optimization Features
+
+Three culling are implemented as optimization features.
+Orientation Cull is amitting object that are to thin to the camera position.
+View-frustum Cull is amitting object that are visible in the camera view frustum.
+Distance Cull is amitting object that are farther than a certain distance.
 
 | Orientation Cull | View-frustum Cull | Distance Cull |
 | ----------- | ----------- | ----------- |
