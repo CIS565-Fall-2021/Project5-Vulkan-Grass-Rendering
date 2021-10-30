@@ -19,9 +19,19 @@ This project implements grass simulation using Vulkan graphics pipeline.
 The simulation is based on this [paper].
 [paper]:https://www.cg.tuwien.ac.at/research/publications/2017/JAHRMANN-2017-RRTG/JAHRMANN-2017-RRTG-draft.pdf
 
-## 
+## Physics Features
 
+Three force simulations are implemented:
+| No Force | w/ Gravity | 
+| ----------- | ----------- | 
+| ![](img/no_force.gif) | ![](img/g.gif) |
+
+| w/ Gravity & Recovery | w/ Gravity & Recovery & Wind |
+| ----------- | ----------- | 
+| ![](img/gr.gif) | ![](img/grw.gif) |
+
+## Optimization Features
 
 | Orientation Cull | View-frustum Cull | Distance Cull |
 | ----------- | ----------- | ----------- |
-| ![](img/cull1.gif) | ![](img/cull2.gif) | ![](img/cull3.gif) 
+| ![](img/cull1.gif) | ![](img/cull2.gif) | ![](img/cull3.gif) |
