@@ -8,9 +8,4 @@ Vulkan Grass Rendering
 
 | Lambertian | Reflective |
 | ------------ | ----------- |
-| ![](img/cull1.gif) | ----------- |
-<p align="center">
-<img src="img/cull1.gif"
-     alt="deer"
-     width="600"/>
-</p>
+| ![](img/cull1.gif) | ![](img/cull1.gif) |
