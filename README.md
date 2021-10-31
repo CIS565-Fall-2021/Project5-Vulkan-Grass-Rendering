@@ -17,7 +17,7 @@ Vulkan Grass Rendering
 Vulkan is a low-overhead, cross-platform API, open standard for 3D graphics and computing.
 This project implements grass simulation using Vulkan graphics pipeline. 
 The simulation is based on this [paper].
-[paper]:https://www.cg.tuwien.ac.at/research/publications/2017/JAHRMANN-2017-RRTG/JAHRMANN-2017-RRTG-draft.pdf
+[paper]: https://www.cg.tuwien.ac.at/research/publications/2017/JAHRMANN-2017-RRTG/JAHRMANN-2017-RRTG-draft.pdf
 
 ## Physics Features
 
