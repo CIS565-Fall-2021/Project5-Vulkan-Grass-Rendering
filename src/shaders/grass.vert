@@ -2,6 +2,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
+// Bound by CreateGrassDescriptorSets()
 layout(set = 1, binding = 0) uniform ModelBufferObject { mat4 model; };
 
 // Declare vertex shader inputs and outputs
