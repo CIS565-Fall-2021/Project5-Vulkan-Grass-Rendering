@@ -72,6 +72,11 @@ struct BladeDrawIndirect {
   uint32_t firstInstance;
 };
 
+/**
+ * @brief Consists of a list of randomly generated Blade upon construction. Size
+ * is NUM_BLADES. VkBuffer has been allocated.
+ *
+ */
 class Blades : public Model {
 private:
   VkBuffer bladesBuffer;
