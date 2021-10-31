@@ -3,10 +3,39 @@ Vulkan Grass Rendering
 
 **University of Pennsylvania, CIS 565: GPU Programming and Architecture, Project 5**
 
-* (TODO) YOUR NAME HERE
-* Tested on: (TODO) Windows 22, i7-2222 @ 2.22GHz 22GB, GTX 222 222MB (Moore 2222 Lab)
+* Zirui Zang
+  * [LinkedIn](https://www.linkedin.com/in/zirui-zang/)
+* Tested on: Windows 10, AMD Ryzen 7 3700X @ 3.60GHz 32GB, RTX2070 SUPER 8GB (Personal)
 
-### (TODO: Your README)
+## Physics-based Grass Simulation in Vulkan
+<p align="center">
+<img src="img/no_cull.gif"
+     alt="deer"
+     width="600"/>
+</p>
 
-*DO NOT* leave the README to the last minute! It is a crucial part of the
-project, and we will not be able to grade you without a good README.
+Vulkan is a low-overhead, cross-platform API, open standard for 3D graphics and computing.
+This project implements grass simulation using Vulkan graphics pipeline. 
+The simulation is based on this [paper](https://www.cg.tuwien.ac.at/research/publications/2017/JAHRMANN-2017-RRTG/JAHRMANN-2017-RRTG-draft.pdf).
+
+## Physics Features
+
+Three force simulations are implemented.Grass is rendered as a up-standing triangle with second degree Bezier curves.
+| No Force | w/ Gravity | 
+| ----------- | ----------- | 
+| ![](img/no_force.png) | ![](img/g_.png) |
+
+| w/ Gravity & Recovery | w/ Gravity & Recovery & Wind |
+| ----------- | ----------- | 
+| ![](img/gr_.png) | ![](img/grw_.png) |
+
+## Optimization Features
+
+Three culling are implemented as optimization features.
+Orientation Cull is amitting object that are to thin to the camera position.
+View-frustum Cull is amitting object that are visible in the camera view frustum.
+Distance Cull is amitting object that are farther than a certain distance.
+
+| Orientation Cull | View-frustum Cull | Distance Cull |
+| ----------- | ----------- | ----------- |
+| ![](img/cull1.gif) | ![](img/cull2.gif) | ![](img/cull3.gif) |
