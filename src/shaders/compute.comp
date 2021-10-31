@@ -1,6 +1,9 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
+#define ORIENTATION_CULLING
+#define VIEW_FRUSTUM_CULLING
+#define DISTANCE_CULLING
 #define WORKGROUP_SIZE 32
 layout(local_size_x = WORKGROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
 
@@ -25,32 +28,126 @@ struct Blade {
 // 1. Store the input blades
 // 2. Write out the culled blades
 // 3. Write the total number of blades remaining
+layout(set = 2, binding = 0) buffer Blades {
+	Blade blades[];
+};
+
+layout(set = 2, binding = 1) buffer CulledBlades {
+	Blade culledBlades[];
+};
 
 // The project is using vkCmdDrawIndirect to use a buffer as the arguments for a draw call
 // This is sort of an advanced feature so we've showed you what this buffer should look like
 //
-// layout(set = ???, binding = ???) buffer NumBlades {
-// 	  uint vertexCount;   // Write the number of blades remaining here
-// 	  uint instanceCount; // = 1
-// 	  uint firstVertex;   // = 0
-// 	  uint firstInstance; // = 0
-// } numBlades;
+layout(set = 2, binding = 2) buffer NumBlades {
+	  uint vertexCount;   // Write the number of blades remaining here
+	  uint instanceCount; // = 1
+	  uint firstVertex;   // = 0
+	  uint firstInstance; // = 0
+} numBlades;
 
 bool inBounds(float value, float bounds) {
     return (value >= -bounds) && (value <= bounds);
 }
 
+// true if inside viewFrustum
+bool viewFrustumTest(vec4 pp) {
+    float tolerance = 0.05;
+    float h = pp.w + tolerance;
+    return inBounds(pp.x, h) && inBounds(pp.y, h) && inBounds(pp.z, h);
+}
+
 void main() {
 	// Reset the number of blades to 0
 	if (gl_GlobalInvocationID.x == 0) {
-		// numBlades.vertexCount = 0;
+		numBlades.vertexCount = 0;
 	}
 	barrier(); // Wait till all threads reach this point
 
     // TODO: Apply forces on every blade and update the vertices in the buffer
+    Blade b = blades[gl_GlobalInvocationID.x];
+    vec3 v0 = b.v0.xyz;
+    vec3 v1 = b.v1.xyz;
+    vec3 v2 = b.v2.xyz;
+    vec3 up = b.up.xyz;
+    float ori = b.v0.w;
+    float height = b.v1.w;
+    float width = b.v2.w;
+    float stiffness = b.up.w;
+    vec3 t1 = normalize(vec3(cos(ori), 0.0, sin(ori)));
 
+    // gravity
+    vec3 ge = vec3(0.0, -9.81, 0.0);
+    vec3 gf = 0.25 * length(ge) * normalize(cross(t1, up));
+    vec3 g = ge + gf;
+
+    // recovery
+    vec3 re = stiffness * (v0 + up * height - v2);
+
+    // wind
+    vec3 wind = vec3(1.0, -1.0, 1.0) * sin(totalTime) * 5.0;
+    float fd = 1 - abs(dot(normalize(wind), normalize(v2 - v0)));
+    float fr = dot(v2 - v0, up) / height;
+    vec3 w = wind * fd * fr;
+
+    // update control points
+    v2 = v2 + (g + re + wind) * deltaTime;
+
+    // state validation
+    v2 = v2 - up * min(up * (v2 - v0), 0);
+    float lproj = length(v2 - v0 - up * dot(v2 - v0, up));
+    v1 = v0 + height * up * max(1 - lproj/height, 0.05 * max(lproj/height, 1));
+    float L0 = length(v2 - v0);
+    float L1 = length(v2 - v1) + length(v1 - v0);
+    float n = 2.0;
+    float L = (2 * L0 + (n - 1) * L1) / (n + 1);
+    float r = height / L;
+    vec3 v1Corr = v0 + r * (v1 -v0);
+    vec3 v2Corr = v1Corr + r * (v2 - v1);
+    v1 = v1Corr;
+    v2 = v2Corr;
+
+    b.v1.xyz = v1;
+    b.v2.xyz = v2;
+    blades[gl_GlobalInvocationID.x] = b;
 	// TODO: Cull blades that are too far away or not in the camera frustum and write them
 	// to the culled blades buffer
 	// Note: to do this, you will need to use an atomic operation to read and update numBlades.vertexCount
 	// You want to write the visible blades to the buffer without write conflicts between threads
+
+#ifdef ORIENTATION_CULLING
+    // orientation culling
+    vec3 dirB = t1;
+    vec3 dirC = normalize(vec3(camera.view[0][2], camera.view[1][2], camera.view[2][2]));
+    if (abs(dot(dirB, dirC)) < 0.7) {
+        return;
+    }
+#endif
+
+#ifdef VIEW_FRUSTUM_CULLING
+    // view-frustum culling
+    mat4 VP = camera.proj * camera.view;
+    vec3 m = 0.25 * v0 + 0.5 * v1 + 0.25 * v2;
+
+    vec4 v0p = VP * vec4(v0,1.0);
+    vec4 v2p = VP * vec4(v2,1.0);
+    vec4 mp = VP * vec4(m,1.0);
+
+    if (!viewFrustumTest(v0p) || !viewFrustumTest(v2p) || !viewFrustumTest(mp)) {
+        return;
+    }
+#endif
+
+#ifdef DISTANCE_CULLING
+    // distance culling
+    vec3 c = vec3(inverse(camera.view) * vec4(0,0,0,1));
+    float dproj = length(v0 - c - up * dot(v0 - c, up));
+    float dmax = 30.0;
+    int level = 10;
+    if (gl_GlobalInvocationID.x % level > level * (1 - dproj / dmax)) {
+        return;
+    }
+#endif
+
+    culledBlades[atomicAdd(numBlades.vertexCount, 1)] = b;
 }

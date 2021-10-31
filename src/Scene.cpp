@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "BufferUtils.h"
+#include "iostream"
 
 Scene::Scene(Device* device) : device(device) {
     BufferUtils::CreateBuffer(device, sizeof(Time), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, timeBuffer, timeBufferMemory);
@@ -23,6 +24,8 @@ void Scene::AddBlades(Blades* blades) {
   this->blades.push_back(blades);
 }
 
+int count = 0;
+
 void Scene::UpdateTime() {
     high_resolution_clock::time_point currentTime = high_resolution_clock::now();
     duration<float> nextDeltaTime = duration_cast<duration<float>>(currentTime - startTime);
@@ -30,7 +33,10 @@ void Scene::UpdateTime() {
 
     time.deltaTime = nextDeltaTime.count();
     time.totalTime += time.deltaTime;
-
+    if (count % 60 == 0) {
+        std::cout << time.totalTime / count << "\n";
+    }
+    count++;
     memcpy(mappedData, &time, sizeof(Time));
 }
 
