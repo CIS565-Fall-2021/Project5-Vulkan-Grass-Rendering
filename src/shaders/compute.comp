@@ -1,6 +1,9 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
+#define ORIENTATION_CULLING
+#define VIEW_FRUSTUM_CULLING
+#define DISTANCE_CULLING
 #define WORKGROUP_SIZE 32
 layout(local_size_x = WORKGROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
 
@@ -49,7 +52,7 @@ bool inBounds(float value, float bounds) {
 
 // true if inside viewFrustum
 bool viewFrustumTest(vec4 pp) {
-    float tolerance = -0.05;
+    float tolerance = 0.05;
     float h = pp.w + tolerance;
     return inBounds(pp.x, h) && inBounds(pp.y, h) && inBounds(pp.z, h);
 }
@@ -71,10 +74,11 @@ void main() {
     float height = b.v1.w;
     float width = b.v2.w;
     float stiffness = b.up.w;
+    vec3 t1 = normalize(vec3(cos(ori), 0.0, sin(ori)));
 
     // gravity
     vec3 ge = vec3(0.0, -9.81, 0.0);
-    vec3 gf = 0.25 * length(ge) * normalize(cross(vec3(cos(ori), 0.0, sin(ori)), up));
+    vec3 gf = 0.25 * length(ge) * normalize(cross(t1, up));
     vec3 g = ge + gf;
 
     // recovery
@@ -87,7 +91,7 @@ void main() {
     vec3 w = wind * fd * fr;
 
     // update control points
-    v2 = v2 + (g + re + w) * deltaTime;
+    v2 = v2 + (g + re + wind) * deltaTime;
 
     // state validation
     v2 = v2 - up * min(up * (v2 - v0), 0);
@@ -111,35 +115,39 @@ void main() {
 	// Note: to do this, you will need to use an atomic operation to read and update numBlades.vertexCount
 	// You want to write the visible blades to the buffer without write conflicts between threads
 
+#ifdef ORIENTATION_CULLING
     // orientation culling
-    vec3 dirB = normalize(vec3(cos(ori), 0.0, sin(ori)));
+    vec3 dirB = t1;
     vec3 dirC = normalize(vec3(camera.view[0][2], camera.view[1][2], camera.view[2][2]));
     if (abs(dot(dirB, dirC)) < 0.7) {
-      //  return;
+        return;
     }
+#endif
 
+#ifdef VIEW_FRUSTUM_CULLING
     // view-frustum culling
     mat4 VP = camera.proj * camera.view;
     vec3 m = 0.25 * v0 + 0.5 * v1 + 0.25 * v2;
 
-    vec4 v0p = VP * vec4(v0,1);
-    vec4 v2p = VP * vec4(v2,1);
-    vec4 mp = VP * vec4(m,1);
+    vec4 v0p = VP * vec4(v0,1.0);
+    vec4 v2p = VP * vec4(v2,1.0);
+    vec4 mp = VP * vec4(m,1.0);
 
-    if (!viewFrustumTest(v0p) && !viewFrustumTest(v2p) && !viewFrustumTest(mp)) {
-       // return;
-    }
-
-    // distance culling
-    vec3 c = vec3(camera.view[0][3], camera.view[1][3], camera.view[2][3]) * -1.0;
-    float dproj = length(v0 - c - up * dot(v0 - c, up));
-    float dmax = 20.0;
-    int level = 10;
-    if (gl_GlobalInvocationID.x % level < level * (1 - dproj / dmax)) {
+    if (!viewFrustumTest(v0p) || !viewFrustumTest(v2p) || !viewFrustumTest(mp)) {
         return;
     }
+#endif
 
-
+#ifdef DISTANCE_CULLING
+    // distance culling
+    vec3 c = vec3(inverse(camera.view) * vec4(0,0,0,1));
+    float dproj = length(v0 - c - up * dot(v0 - c, up));
+    float dmax = 30.0;
+    int level = 10;
+    if (gl_GlobalInvocationID.x % level > level * (1 - dproj / dmax)) {
+        return;
+    }
+#endif
 
     culledBlades[atomicAdd(numBlades.vertexCount, 1)] = b;
 }
