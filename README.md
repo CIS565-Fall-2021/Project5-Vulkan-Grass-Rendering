@@ -18,11 +18,11 @@ This is a grass simulator and renderer with different forces and culling methods
 
 | No force | Gravity Force|
 |----------|--------------|
-|![](img/noforce.png) |![](img/g.png) |
+|![](img/noforce.PNG) |![](img/g.PNG) |
 
 | Gravity + Recovery | Gravity + Recovery + Wind |
 |----------|--------------|
-|![](img/gre.png) |![](img/wind.gif) |
+|![](img/gre.PNG) |![](img/wind.gif) |
 
 ### Culling Tests
 
@@ -40,7 +40,7 @@ For distance culling, we cull blades if it is too far from the camera's position
 
 ### Performance Analysis
 
-![](img/grassTime.PNG)
+![](img/grassTime.png)
 
 From above plot, we can see that render time increases as num of grass increases.
 
