@@ -20,6 +20,7 @@ Renderer::Renderer(Device *device, SwapChain *swapChain, Scene *scene, Camera *c
     CreateRenderPass();
     CreateCameraDescriptorSetLayout();
     CreateModelDescriptorSetLayout();
+    CreateGrassDescriptorSetLayout();
     CreateTimeDescriptorSetLayout();
     CreateComputeDescriptorSetLayout();
     CreateDescriptorPool();
@@ -182,6 +183,29 @@ void Renderer::CreateModelDescriptorSetLayout()
     }
 }
 
+void Renderer::CreateGrassDescriptorSetLayout()
+{
+    VkDescriptorSetLayoutBinding uboLayoutBinding = {};
+    uboLayoutBinding.binding = 0;
+    uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBinding.descriptorCount = 1;
+    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    uboLayoutBinding.pImmutableSamplers = nullptr;
+
+    std::vector<VkDescriptorSetLayoutBinding> bindings = {uboLayoutBinding};
+
+    // Create the descriptor set layout
+    VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+    layoutInfo.pBindings = bindings.data();
+
+    if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &grassDescriptorSetLayout) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create descriptor set layout");
+    }
+}
+
 void Renderer::CreateTimeDescriptorSetLayout()
 {
     // Describe the binding of the descriptor set layout
@@ -230,6 +254,9 @@ void Renderer::CreateDescriptorPool()
         {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1},
 
         // TODO: Add any additional types and counts of descriptors you will need to allocate
+        // {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, static_cast<uint32_t>(scene->GetModels().size() + scene->GetBlades().size())},
+        // {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, static_cast<uint32_t>(scene->GetModels().size() + scene->GetBlades().size())},
+        // {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, static_cast<uint32_t>(scene->GetModels().size() + scene->GetBlades().size())},
     };
 
     VkDescriptorPoolCreateInfo poolInfo = {};
@@ -340,10 +367,41 @@ void Renderer::CreateModelDescriptorSets()
 void Renderer::CreateGrassDescriptorSets()
 {
     // TODO: Create Descriptor sets for the grass.
-
+    // resize
+    grassDescriptorSets.resize(scene->GetBlades().size());
     // Describe the descriptor set
     VkDescriptorSetLayout layouts[] = {grassDescriptorSetLayout};
-    // This should involve creating descriptor sets which point to the model matrix of each group of grass blades
+    VkDescriptorSetAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = descriptorPool;
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(scene->GetBlades().size());
+    allocInfo.pSetLayouts = layouts;
+    //Alloc descriptor sets
+    if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, grassDescriptorSets.data()) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to allocate descriptor set");
+    }
+    //descriptor write
+    std::vector<VkWriteDescriptorSet> descriptorWrites(grassDescriptorSets.size());
+    // loopy boi
+    for (uint32_t i = 0; i < scene->GetBlades().size(); i++)
+    {
+        VkDescriptorBufferInfo modelBufferInfo = {};
+        modelBufferInfo.buffer = scene->GetBlades()[i]->GetModelBuffer();
+        modelBufferInfo.offset = 0;
+        modelBufferInfo.range = sizeof(ModelBufferObject);
+
+        descriptorWrites[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[i].dstSet = grassDescriptorSets[i];
+        descriptorWrites[i].dstBinding = 0;
+        descriptorWrites[i].dstArrayElement = 0;
+        descriptorWrites[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrites[i].descriptorCount = 1;
+        descriptorWrites[i].pBufferInfo = &modelBufferInfo;
+        descriptorWrites[i].pImageInfo = nullptr;
+        descriptorWrites[i].pTexelBufferView = nullptr;
+    }
+    //update descriptor sets
     vkUpdateDescriptorSets(logicalDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 }
 
@@ -686,6 +744,7 @@ void Renderer::CreateGrassPipeline()
     colorBlending.blendConstants[2] = 0.0f;
     colorBlending.blendConstants[3] = 0.0f;
 
+    //TODO: add grassDescriptionSetLayout????
     std::vector<VkDescriptorSetLayout> descriptorSetLayouts = {cameraDescriptorSetLayout, modelDescriptorSetLayout};
 
     // Pipeline layout: used to specify uniform values
@@ -1116,6 +1175,7 @@ Renderer::~Renderer()
 
     vkDestroyDescriptorSetLayout(logicalDevice, cameraDescriptorSetLayout, nullptr);
     vkDestroyDescriptorSetLayout(logicalDevice, modelDescriptorSetLayout, nullptr);
+    vkDestroyDescriptorSetLayout(logicalDevice, grassDescriptorSetLayout, nullptr);
     vkDestroyDescriptorSetLayout(logicalDevice, timeDescriptorSetLayout, nullptr);
 
     vkDestroyDescriptorPool(logicalDevice, descriptorPool, nullptr);
