@@ -184,7 +184,7 @@ void main() {
                            floor(num_buckets * (1 - d_proj / d_max)));
 
   // final output
-  if (!culledByViewFrustum) {
+  if (!culledByDistance && !culledByOrientation && !culledByViewFrustum) {
     culledBlades.culled_blades[atomicAdd(numBlades.vertexCount, 1)] = blade;
   }
 }
