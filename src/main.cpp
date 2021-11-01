@@ -66,7 +66,7 @@ void mouseMoveCallback(GLFWwindow* window, double xPosition, double yPosition) {
 
 int main() {
   static constexpr char applicationName[] = "Vulkan Grass Rendering";
-  InitializeWindow(640, 480, applicationName);
+  InitializeWindow(1920, 1080, applicationName);
 
   unsigned int glfwExtensionCount = 0;
   const char** glfwExtensions =
@@ -99,7 +99,7 @@ int main() {
 
   swapChain = device->CreateSwapChain(surface, 5);
 
-  camera = new Camera(device, 640.f / 480.f);
+  camera = new Camera(device, 1920.f / 1080.f);
 
   VkCommandPoolCreateInfo transferPoolInfo = {};
   transferPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
