@@ -37,8 +37,9 @@ void main() {
     vec3 b = lerp(v1, v2, v);
     vec3 c = lerp(a, b, v);
 
-    vec3 t1 = vec3(1.0, 0.0, 0.0);  // TODO: How to determine this?
+    vec3 t1 = vec3(-1.0, 0.0, 0.0);
     t1 = cos(theta)*t1 + sin(theta)*cross(up, t1) + (1 - cos(theta))*dot(up, t1)*up;
+    normalize(t1);
 
     vec3 t0 = normalize(b - a);
 

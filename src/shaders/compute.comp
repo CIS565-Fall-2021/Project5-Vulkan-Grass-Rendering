@@ -6,8 +6,10 @@
 #define WF 0.5
 
 #define CULLING 1
-#define MAX_DIST 2.0
-#define BUCKETS 10
+#define DIST_CULLING_MAX 15.0
+#define DIST_CULLING_N 10
+#define FRUSTUM_CULLING_THRESHOLD 0.01
+#define ORIENTATION_CULLING_THRESHOLD 0.97
 
 #define WORKGROUP_SIZE 32
 layout(local_size_x = WORKGROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
@@ -29,11 +31,6 @@ struct Blade {
     vec4 up;
 };
 
-// TODO: Add bindings to:
-// 1. Store the input blades
-// 2. Write out the culled blades
-// 3. Write the total number of blades remaining
-
 layout(set = 2, binding = 0) buffer Blades {
     Blade blades[];  
 };
@@ -41,9 +38,6 @@ layout(set = 2, binding = 1) buffer CulledBlades {
     Blade culledBlades[];
 };
 
-// The project is using vkCmdDrawIndirect to use a buffer as the arguments for a draw call
-// This is sort of an advanced feature so we've showed you what this buffer should look like
-//
 layout(set = 2, binding = 2) buffer NumBlades {
  	uint vertexCount;   // Write the number of blades remaining here
  	uint instanceCount; // = 1
@@ -57,7 +51,7 @@ bool inBounds(float value, float bounds) {
 
 bool inFrustum(vec3 p) {
     vec4 pp = camera.proj * camera.view * vec4(p, 1.0);
-    float h = pp.w + 0.01;
+    float h = pp.w + FRUSTUM_CULLING_THRESHOLD;
     return inBounds(pp.x, h) ^^ inBounds(pp.y, h) ^^ inBounds(pp.z, h);
 }
 
@@ -108,8 +102,8 @@ void main() {
     // Gravity
     vec4 D = vec4(0.0, -1.0, 0.0, G);
 
-    vec3 t1 = vec3(1.0, 0.0, 0.0);  // TODO: How to determine this?
-    t1 = cos(theta)*t1 + sin(theta)*cross(up, t1) + (1 - cos(theta))*dot(up, t1)*up;
+    vec3 t1 = vec3(-1.0, 0.0, 0.0);
+    t1 = cos(theta)*t1 + sin(theta)*cross(up, t1) + (1.0 - cos(theta))*dot(up, t1)*up;
     vec3 t0 = normalize(v2 - v0);
     t1 = normalize(t1);
     vec3 f = normalize(cross(t0, t1));
@@ -128,7 +122,7 @@ void main() {
     float fr = dot((v2 - v0), up) / h;
     vec3 w = windDir * (fd * fr);
 
-    v2 += (r + g + w) * deltaTime;
+    v2 += (r + g) * deltaTime;
 
     // State Validation
     v2 = v2 - up * min(dot(up, v2 - v0), 0);
@@ -149,9 +143,15 @@ void main() {
     blades[index].v2.xyz = v2.xyz;
 
     if (CULLING == 1) {
+
+        vec3 c = inverse(camera.view)[3].xyz;  // camera's position in world space
+
+        // NOTE: viewing direction is projected on the plane so that it's coplanar 
+        // with the blade direction. Can be used for distance culling as well
+        vec3 viewVec = v0 - c - up*dot(v0 - c, up);
+
         // Orientation Culling
-        vec3 c = camera.view[3].xyz;
-        if (0.9 > abs(dot(normalize(v0 - c), t1)))
+        if (ORIENTATION_CULLING_THRESHOLD < abs(dot(normalize(viewVec), t1)))
             return;
 
         // View-Frustum Culling
@@ -160,9 +160,9 @@ void main() {
             return;
 
         // Distance Culling
-        float dproj = length(v0 - c - up*dot(v0 - c, up));
-        int n = int(floor(dproj/(MAX_DIST/BUCKETS)));
-        if (index % n < n*(1.0-dproj/MAX_DIST))
+        float dproj = length(viewVec);
+        int n = DIST_CULLING_N;
+        if (index % n < int(floor(n*(1.0 - dproj/DIST_CULLING_MAX))))
             return;
     }
 
