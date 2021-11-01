@@ -3,10 +3,13 @@ Vulkan Grass Rendering
 
 **University of Pennsylvania, CIS 565: GPU Programming and Architecture, Project 5**
 
-* (TODO) YOUR NAME HERE
-* Tested on: (TODO) Windows 22, i7-2222 @ 2.22GHz 22GB, GTX 222 222MB (Moore 2222 Lab)
+* Zhihao Ruan
+* Tested on: Windows 10 Home 21H1 Build 19043.1288, Ryzen 7 3700X @ 3.59GHz 48GB, RTX 2060 Super 8GB
 
-### (TODO: Your README)
+![](img/overall.gif)
 
-*DO NOT* leave the README to the last minute! It is a crucial part of the
-project, and we will not be able to grade you without a good README.
+## Highlights
+This project implements physically-based grass rendering & culling with Vulkan compute shaders:
+- Physically-based real-time rendering of grass blades;
+- 3 different culling tests: orientation culling, view-frustum culling, distance culling;
+- Tessellating Bezier curves into grass blades with GLSL tessellation shader
