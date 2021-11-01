@@ -1267,7 +1267,7 @@ void Renderer::RecordCommandBuffers() {
       // Bind the descriptor set for each grass blades model
       vkCmdBindDescriptorSets(
           commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
-          grassPipelineLayout, 1, 1, &grassDescriptorSets[i], 0, nullptr);
+          grassPipelineLayout, 1, 1, &grassDescriptorSets[j], 0, nullptr);
 
       // Draw
       // Uncomment this when the buffers are populated
