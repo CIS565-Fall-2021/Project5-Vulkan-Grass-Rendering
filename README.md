@@ -53,4 +53,9 @@ The following image demonstrates the up-straight pose of the blade (no physics f
 
 ![](img/blade_upstraight.png)
 
+## Performance Analysis 
+The following FPS tests on different culling options is conducted with `NUM_BLADES = 1 << 18`:
 
+![](img/performance_analysis.png)
+
+We can see that orientation culling improves the rendering FPS the most, while all the others also have some improvements on the FPS.
