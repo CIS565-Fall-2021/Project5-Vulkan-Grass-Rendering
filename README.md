@@ -41,4 +41,10 @@ Blade culling is an optimization technique that the paper mentions to improve FP
 - are outside the camera's view frustum;
 - are not facing towards the camera.
 
-Culling tests are conducted in the compute shader so that the number of grass blades that need rendering varies with the position and orientation of the camera. 
+Culling tests are conducted in the compute shader so that the number of grass blades that need rendering varies with the position and orientation of the camera.
+
+## Visual Effects
+The following images demonstrates effects due to different culling operations:
+|       Orientation Culling        |       View-Frustum Culling        |       Distance Culling        |
+| :------------------------------: | :-------------------------------: | :---------------------------: |
+| ![](img/orientation_culling.gif) | ![](img/view_frustum_culling.gif) | ![](img/distance_culling.gif) |
