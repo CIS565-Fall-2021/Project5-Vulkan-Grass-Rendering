@@ -40,8 +40,18 @@ void main() {
   vec3 n  = normalize(cross(t0, t1));  // interpolated normal
 
   // vertex for basic shape
-  // use quad
-  float t = u;
+  //  Reference: Responsive Real-Time Grass Rendering for General 3D Scenes
+  //             Section 6.3, basic shapes
+  //
+  // Quad:          t = u
+  // Triangle:      t = u + 0.5 * v - u * v
+  // Quadratic:     t = u - u * v * v
+  // Triangle-tip:  t = 0.5 +
+  //                  (u - 0.5)*(1 - max(v - threshold, 0)/(1 - threshold))
+  //
+  // use triangle for best visual effects
+  //
+  float t = u + 0.5 * v - u * v;
   vec3 p  = mix(c0, c1, t);
 
   // calculate outputs
