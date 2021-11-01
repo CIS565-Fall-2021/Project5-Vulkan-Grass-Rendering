@@ -4,6 +4,8 @@
 #define ORIENTATION_CULL 0
 #define FRUSTUM_CULL 0
 #define DISTANCE_CULL 0
+#define NOISE_FREQUENCY 7.0
+#define FBM_OCTAVES 6
 
 #define WORKGROUP_SIZE 32
 layout(local_size_x = WORKGROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
@@ -50,12 +52,45 @@ bool inBounds(float value, float bounds) {
     return (value >= -bounds) && (value <= bounds);
 }
 
+// worley noise adapted from cis 460 + https://www.shadertoy.com/view/tlKXzh
+
+vec2 random( vec2 p ) {
+    return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
+}
+
+float worleyNoise(vec2 uv) {
+    // Tile the space
+    vec2 uvInt = floor(uv);
+    vec2 uvFract = fract(uv);
+    float minDist = 1.0; // Minimum distance initialized to max.
+
+    // Search all neighboring cells and this cell for their point
+    for(int y = -1; y <= 1; y++) {
+        for(int x = -1; x <= 1; x++) {
+            vec2 neighbor = vec2(float(x), float(y));
+
+            // Random point inside current neighboring cell
+            vec2 point = random(uvInt + neighbor);
+
+            // Compute the distance b/t the point and the fragment
+            // Store the min dist thus far
+            vec2 diff = neighbor + point - uvFract;
+            float dist = length(diff);
+            minDist = min(minDist, dist);
+        }
+    }
+    return minDist;
+}
+
+
 void main() {
 	// Reset the number of blades to 0
 	if (gl_GlobalInvocationID.x == 0) {
 		numBlades.vertexCount = 0;
 	}
 	barrier(); // Wait till all threads reach this point
+
+    mat4 invView = inverse(camera.view); //for culling
 
     // Done: Apply forces on every blade and update the vertices in the buffer
     vec3 v0 = inBlades[gl_GlobalInvocationID.x].v0.xyz;
@@ -80,10 +115,10 @@ void main() {
     vec3 gF = 0.25 * length(gE) * fDir;
     vec3 gravity = gE + gF;
 
-    // TODO: wind force
-    //vec3 wind = vec3(0.f); 
+    // Done: wind force
+    vec3 wind = normalize(vec3(sin(totalTime * worleyNoise(0.5 * v0.xz)), 0.5, cos(totalTime * worleyNoise(0.5 * v0.xz))));; 
 
-    vec3 tv2 = (gravity + recovery) * 0.01;
+    vec3 tv2 = (gravity + recovery + wind) * 0.01;
 	v2 += tv2;
 
     // state validation
@@ -106,5 +141,31 @@ void main() {
 	// Note: to do this, you will need to use an atomic operation to read and update numBlades.vertexCount
 	// You want to write the visible blades to the buffer without write conflicts between threads
 
-    remainingBlades[atomicAdd(numBlades.vertexCount, 1)] = inBlades[gl_GlobalInvocationID.x];
+    bool cull = false;
+
+    // orientation cull
+    vec3 viewDir = normalize(vec3(camera.view[0][2], camera.view[1][2], camera.view[2][2]));
+	cull = cull || abs(dot(oDir, viewDir)) > 0.9;
+
+    // view frustum cull
+    vec3 midPt = 0.25 * v0 + 0.5 * v1 + 0.25 * v2;
+    vec4 v0NDC = camera.proj * camera.view * vec4(v0, 1.0);
+	vec4 v2NDC = camera.proj * camera.view * vec4(v2, 1.0);
+	vec4 midNDC = camera.proj * camera.view * vec4(midPt, 1.0);
+	float v0Bound = v0NDC.w + 0.1;
+	float v2Bound = v2NDC.w + 0.1;
+	float midBound = midNDC.w + 0.1;
+	bool v0Bool = inBounds(v0NDC.x, v0Bound) && inBounds(v0NDC.y, v0Bound) && inBounds(v0NDC.z, v0Bound);
+	bool v2Bool = inBounds(v2NDC.x, v2Bound) && inBounds(v2NDC.y, v2Bound) && inBounds(v2NDC.z, v2Bound);
+	bool midBool = inBounds(midNDC.x, midBound) && inBounds(midNDC.y, midBound) && inBounds(midNDC.z, midBound);
+    cull = cull || (!v0Bool && !v2Bool && !midBool);
+
+    // distance cull
+    vec3 cameraPos = vec3(invView[3][0], invView[3][1], invView[3][2]);
+	float dProj = length(v0 - cameraPos - up * dot(v0 - cameraPos, up));
+	cull = cull || (mod(gl_GlobalInvocationID.x, 3) > floor(3 * (1.0 - dProj / 50.f)));
+
+    if (!cull) {
+        remainingBlades[atomicAdd(numBlades.vertexCount, 1)] = inBlades[gl_GlobalInvocationID.x];
+    }
 }
