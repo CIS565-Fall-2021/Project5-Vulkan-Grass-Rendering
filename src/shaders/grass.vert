@@ -22,9 +22,9 @@ out gl_PerVertex { vec4 gl_Position; };
 
 void main() {
   // Write gl_Position and any other shader outputs
-  gl_Position = model * vec4(v0.xyz, 1.0f);
-  out_v0      = vec4((model * vec4(v0.xyz, 1.0f)).xyz, v0.w);
-  out_v1      = vec4((model * vec4(v1.xyz, 1.0f)).xyz, v1.w);
-  out_v2      = vec4((model * vec4(v2.xyz, 1.0f)).xyz, v2.w);
-  out_up      = vec4((model * vec4(up.xyz, 1.0f)).xyz, up.w);
+  gl_Position = model * vec4(v0.xyz, 1.f);
+  out_v0      = vec4((model * vec4(v0.xyz, 1.f)).xyz, v0.w);
+  out_v1      = vec4((model * vec4(v1.xyz, 1.f)).xyz, v1.w);
+  out_v2      = vec4((model * vec4(v2.xyz, 1.f)).xyz, v2.w);
+  out_up      = vec4((model * vec4(up.xyz, 0.f)).xyz, up.w);
 }
