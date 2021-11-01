@@ -48,3 +48,9 @@ The following images demonstrates effects due to different culling operations:
 |       Orientation Culling        |       View-Frustum Culling        |       Distance Culling        |
 | :------------------------------: | :-------------------------------: | :---------------------------: |
 | ![](img/orientation_culling.gif) | ![](img/view_frustum_culling.gif) | ![](img/distance_culling.gif) |
+
+The following image demonstrates the up-straight pose of the blade (no physics forces, no culling):
+
+![](img/blade_upstraight.png)
+
+
