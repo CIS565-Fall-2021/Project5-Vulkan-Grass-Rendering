@@ -71,14 +71,17 @@ int main() {
 
     unsigned int glfwExtensionCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
+    
+    //NOTE: First thing is to create an instance -> connection between application and the Vulkan library
     Instance* instance = new Instance(applicationName, glfwExtensionCount, glfwExtensions);
 
+    //NOTE: Connection between Vulkan and the windows system to present result to the screen
     VkSurfaceKHR surface;
     if (glfwCreateWindowSurface(instance->GetVkInstance(), GetGLFWWindow(), nullptr, &surface) != VK_SUCCESS) {
         throw std::runtime_error("Failed to create window surface");
     }
 
+    //NOTE: Need to select a physical GPU device to use
     instance->PickPhysicalDevice({ VK_KHR_SWAPCHAIN_EXTENSION_NAME }, QueueFlagBit::GraphicsBit | QueueFlagBit::TransferBit | QueueFlagBit::ComputeBit | QueueFlagBit::PresentBit, surface);
 
     VkPhysicalDeviceFeatures deviceFeatures = {};
@@ -86,8 +89,10 @@ int main() {
     deviceFeatures.fillModeNonSolid = VK_TRUE;
     deviceFeatures.samplerAnisotropy = VK_TRUE;
 
+    //NOTE: Create the logical device here and connecting to the physical device
     device = instance->CreateDevice(QueueFlagBit::GraphicsBit | QueueFlagBit::TransferBit | QueueFlagBit::ComputeBit | QueueFlagBit::PresentBit, deviceFeatures);
 
+    //NOTE: Swap chain is essentially a queue of images that are waiting to be presented to the screen
     swapChain = device->CreateSwapChain(surface, 5);
 
     camera = new Camera(device, 640.f / 480.f);
@@ -129,6 +134,7 @@ int main() {
     );
     plane->SetTexture(grassImage);
     
+    // NOTE: Blades class contains ALL blades (i.e. vector is contained within the class)
     Blades* blades = new Blades(device, transferCommandPool, planeDim);
 
     vkDestroyCommandPool(device->GetVkDevice(), transferCommandPool, nullptr);
