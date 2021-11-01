@@ -1,6 +1,7 @@
 #include <vulkan/vulkan.h>
 
 #include "Camera.h"
+#include "FPS.h"
 #include "Image.h"
 #include "Instance.h"
 #include "Renderer.h"
@@ -146,11 +147,18 @@ int main() {
   glfwSetMouseButtonCallback(GetGLFWWindow(), mouseDownCallback);
   glfwSetCursorPosCallback(GetGLFWWindow(), mouseMoveCallback);
 
+  fps_counter::FPS fps;
+  fps.start();
+
   while (!ShouldQuit()) {
     glfwPollEvents();
     scene->UpdateTime();
     renderer->Frame();
+    fps.update();
   }
+
+  fps.stop();
+  fps.printFPSMessage();
 
   vkDeviceWaitIdle(device->GetVkDevice());
 
@@ -166,5 +174,10 @@ int main() {
   delete device;
   delete instance;
   DestroyWindow();
+
+#if defined(_WIN32)
+  system("pause");  // stop Win32 console from closing on exit
+#endif
+
   return 0;
 }
