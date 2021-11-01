@@ -65,6 +65,7 @@ void main() {
   // threads
 
   // final output
-  culledBlades.culled_blades[gl_GlobalInvocationID.x] =
+  int output_blade_idx = int(atomicAdd(numBlades.vertexCount, 1));
+  culledBlades.culled_blades[output_blade_idx] =
       inBlades.in_blades[gl_GlobalInvocationID.x];
 }
