@@ -6,12 +6,6 @@ Vulkan Grass Rendering
 * Nuofan Xu
 * Tested on: Windows 10, AMD Ryzen 3800X @ 32GB, RTX 2080 Super 
 
-## Demo Video
-
-[![](readmeImages/GrassTesselationVimeoLinkImage.png)](https://vimeo.com/241412888)
-
-_Can simulate and render over 1 million blades of grass on a notebook GTX 1070._
-
 ## OverView
 
 This project implements a grass simulator and renderer using Vulkan. Each grass blade is represented by a quadratic Bezier curve, and physics calculations are performed on these control points in a computing shader. Rendering every grass blade in the scene is computationally expensive and not favorable - luckily grass blade that do not contribute to a frame can be culled in the shader. 
@@ -91,7 +85,7 @@ In the past, a high-quality grass simulation would have been considered too comp
 
 Consider the scenario in which the front face direction of the grass blade is perpendicular to the view vector. Since our grass blades won't have width, we will end up trying to render parts of the grass that are actually smaller than the size of a pixel. This could lead to aliasing artifacts. Therefore blades oriented at angles almost perpendicular to the view vector are culled. 
 
-![](readmeImages/orientation_culling.gif)
+![](img/orientation_culling.gif)
 
 The above scene is trying to demonstrate the culling done with different viewing angles and note that as the scene rotates, some of the blades suddenly disappear (when blades are perpendidular to the view) or re-appear, meaning that blades are culled based on their orientation with respect to the camera. 
 
@@ -99,7 +93,7 @@ The above scene is trying to demonstrate the culling done with different viewing
 
 Blades that are outside of the view-frustum should be culled because they will never be rendered on screen. This means we can avoid doing computation for all the grass blades outside of the view-frustum. To determine if a blade is in frame, we compare the visibility of the first and last control points and a weighted midpoint instead of `v1` because `v1` does not lie on the curve.
 
-![](img/frustum_culling.gif)
+![](img/view_culling.gif)
 
 As camera zooms in on the scene, more blades move outside of the viewing frustum and less blades are rendered. 
 
@@ -111,7 +105,7 @@ Similar to orientation culling, grass blades at large distances from the camera 
 
 ## Performance Analysis
 
-![](img/perform_analysis.PNG)
+![](img/perform_analysis_table.PNG)
 ![](img/bar.PNG)
 
 The graph clearly show us that any type of culling can speed up the rendering process, and when three types of culling metthods are combined together, it leads to a substantial performance boost. And this provides us a meaningful way of saving computational power while keeping the rendered scene real, if not better.
