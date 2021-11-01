@@ -16,8 +16,8 @@ layout(location = 0) out vec4 outColor;
 
 void main() {
   // Compute fragment color
-  vec3 dark_green  = vec3(0.0, 0.2, 0.0);
-  vec3 light_green = vec3(0.0, 0.8, 0.0);
+  vec3 dark_green  = vec3(0.2, 0.4, 0.0);
+  vec3 light_green = vec3(0.4, 0.8, 0.0);
   vec3 light       = normalize(vec3(1.0, 1.0, 1.0));
 
   // 1. compute color; mixing from dark to light green
@@ -25,7 +25,7 @@ void main() {
 
   // 2. compute lambertian shading
   float lambert_diffuse = dot(vec3(nor), light);
-  float lambert_ambient = 0.2;
+  float lambert_ambient = 0.4;
   float light_intensity = clamp(lambert_diffuse, 0, 1) + lambert_ambient;
 
   outColor = vec4(light_intensity * color, 1.0);
