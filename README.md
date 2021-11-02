@@ -80,7 +80,7 @@ We then see how much our frames per second changes as we add these culling techn
 
 
 
-<img src="img\performance.png" height="500px"/>
+<img src="img\performance.png" height="400px"/>
 
 
 
