@@ -1,14 +1,17 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#define G 4
-#define WS 10
-#define WF 0.5
+#define G 4.0     // Gravity
+#define WS 3.0   // Wind Strength
+#define WF 0.5  // Wind Frequency
 
-#define CULLING 1
+#define CULLING true
+#define ORIENTATION_CULLING true
+#define FRUSTUM_CULLING true
+#define DIST_CULLING true
 #define DIST_CULLING_MAX 15.0
 #define DIST_CULLING_N 10
-#define FRUSTUM_CULLING_THRESHOLD 0.01
+#define FRUSTUM_CULLING_THRESHOLD 1.1
 #define ORIENTATION_CULLING_THRESHOLD 0.97
 
 #define WORKGROUP_SIZE 32
@@ -50,9 +53,13 @@ bool inBounds(float value, float bounds) {
 }
 
 bool inFrustum(vec3 p) {
+    // NOTE: Slight modification from the paper: instead of adding a small tolerannce value, 
+    // I'm using a weight factor so that it's not dependent on the magnitude of w.
+    // Also not testing against pp.z since usually we'd want the whole depth.
+
     vec4 pp = camera.proj * camera.view * vec4(p, 1.0);
-    float h = pp.w + FRUSTUM_CULLING_THRESHOLD;
-    return inBounds(pp.x, h) ^^ inBounds(pp.y, h) ^^ inBounds(pp.z, h);
+    float h = pp.w * FRUSTUM_CULLING_THRESHOLD;
+    return inBounds(pp.x, h) && inBounds(pp.y, h);
 }
 
 /*
@@ -122,7 +129,7 @@ void main() {
     float fr = dot((v2 - v0), up) / h;
     vec3 w = windDir * (fd * fr);
 
-    v2 += (r + g) * deltaTime;
+    v2 += (r + g + w) * deltaTime;
 
     // State Validation
     v2 = v2 - up * min(dot(up, v2 - v0), 0);
@@ -142,7 +149,7 @@ void main() {
     blades[index].v1.xyz = v1.xyz;
     blades[index].v2.xyz = v2.xyz;
 
-    if (CULLING == 1) {
+    if (CULLING) {
 
         vec3 c = inverse(camera.view)[3].xyz;  // camera's position in world space
 
@@ -151,18 +158,18 @@ void main() {
         vec3 viewVec = v0 - c - up*dot(v0 - c, up);
 
         // Orientation Culling
-        if (ORIENTATION_CULLING_THRESHOLD < abs(dot(normalize(viewVec), t1)))
+        if (ORIENTATION_CULLING && ORIENTATION_CULLING_THRESHOLD < abs(dot(normalize(viewVec), t1)))
             return;
 
         // View-Frustum Culling
         vec3 m = 0.25*v0 + 0.5*v1 + 0.25*v2;
-        if (!inFrustum(v0) && !inFrustum(v2) && !inFrustum(m))
+        if (FRUSTUM_CULLING && !inFrustum(v0) && !inFrustum(v2) && !inFrustum(m))
             return;
 
         // Distance Culling
         float dproj = length(viewVec);
         int n = DIST_CULLING_N;
-        if (index % n < int(floor(n*(1.0 - dproj/DIST_CULLING_MAX))))
+        if (DIST_CULLING && index % n < int(floor(n*(1.0 - dproj/DIST_CULLING_MAX))))
             return;
     }
 

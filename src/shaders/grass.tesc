@@ -1,7 +1,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#define TESSLEVEL 5.0
+#define TESSLEVEL 10.0
 
 // NOTE: The TCS takes an input patch and emits an output patch.
 // The group of CPs (Control Points) is called a patch

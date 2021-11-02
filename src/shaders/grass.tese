@@ -48,10 +48,10 @@ void main() {
     vec3 c0 = c - w * t1;
     vec3 c1 = c + w * t1;
 
-    float t = u + 0.5*v - u*v; // quad
+    float t = u + 0.5*v - u*v;
     vec3 pos = lerp(c0, c1, t);
 
-    fs_pos = pos;
+    fs_pos = pos;  // vertex position in world space
 
     gl_Position = camera.proj * camera.view * vec4(pos, 1.0);  // transform to clip space
 }
