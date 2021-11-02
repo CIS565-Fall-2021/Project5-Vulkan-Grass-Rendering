@@ -26,6 +26,9 @@ private:
     std::vector<Model*> models;
     std::vector<Blades*> blades;
 
+    float fps;
+    int count;
+
 high_resolution_clock::time_point startTime = high_resolution_clock::now();
 
 public:

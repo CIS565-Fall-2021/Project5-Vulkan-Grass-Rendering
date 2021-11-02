@@ -1,10 +1,14 @@
 #include "Scene.h"
 #include "BufferUtils.h"
+#include <iostream>
 
 Scene::Scene(Device* device) : device(device) {
     BufferUtils::CreateBuffer(device, sizeof(Time), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, timeBuffer, timeBufferMemory);
     vkMapMemory(device->GetVkDevice(), timeBufferMemory, 0, sizeof(Time), 0, &mappedData);
     memcpy(mappedData, &time, sizeof(Time));
+
+    fps = 0.0f;
+    count = 0;
 }
 
 const std::vector<Model*>& Scene::GetModels() const {
@@ -30,6 +34,19 @@ void Scene::UpdateTime() {
 
     time.deltaTime = nextDeltaTime.count();
     time.totalTime += time.deltaTime;
+
+    fps += time.deltaTime;
+    count++;
+
+    if (count == 100)
+    {
+        fps /= count;
+        fps = 1 / fps;
+        std::cout << "fps: " << fps << std::endl;
+        
+        fps = 0;
+        count = 0;
+    }
 
     memcpy(mappedData, &time, sizeof(Time));
 }

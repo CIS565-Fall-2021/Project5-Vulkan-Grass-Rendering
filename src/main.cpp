@@ -6,6 +6,8 @@
 #include "Scene.h"
 #include "Image.h"
 
+#include "chrono"
+
 Device* device;
 SwapChain* swapChain;
 Renderer* renderer;
@@ -91,6 +93,7 @@ int main() {
     swapChain = device->CreateSwapChain(surface, 5);
 
     camera = new Camera(device, 640.f / 480.f);
+    camera->UpdateOrbit(0, -35, -10); // for performance analysis
 
     VkCommandPoolCreateInfo transferPoolInfo = {};
     transferPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -116,7 +119,7 @@ int main() {
         grassImageMemory
     );
 
-    float planeDim = 15.f;
+    float planeDim = 15.f; // 15.f is default
     float halfWidth = planeDim * 0.5f;
     Model* plane = new Model(device, transferCommandPool,
         {
