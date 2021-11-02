@@ -18,7 +18,7 @@ public:
 
     void CreateCameraDescriptorSetLayout();
     void CreateModelDescriptorSetLayout();
-    void CreateGrassDescriptorSetLayout();
+    // void CreateGrassDescriptorSetLayout();
     void CreateTimeDescriptorSetLayout();
     void CreateComputeDescriptorSetLayout();
 
@@ -57,15 +57,24 @@ private:
 
     VkDescriptorSetLayout cameraDescriptorSetLayout;
     VkDescriptorSetLayout modelDescriptorSetLayout;
-    VkDescriptorSetLayout grassDescriptorSetLayout;
+    // VkDescriptorSetLayout grassDescriptorSetLayout;
     VkDescriptorSetLayout timeDescriptorSetLayout;
+    VkDescriptorSetLayout computeDescriptorSetLayout;
+    // VkDescriptorSetLayout computeBladesDescriptorSetLayout;
+    // VkDescriptorSetLayout computeCulledBladesDescriptorSetLayout;
+    // VkDescriptorSetLayout computeNumBladesDescriptorSetLayout;
 
     VkDescriptorPool descriptorPool;
 
     VkDescriptorSet cameraDescriptorSet;
     std::vector<VkDescriptorSet> modelDescriptorSets;
-    std::vector<VkDescriptorSet> grassDescriptorSets;
+    // std::vector<VkDescriptorSet> grassDescriptorSets;
     VkDescriptorSet timeDescriptorSet;
+    // std::vector<VkDescriptorSet> computeBladesDescriptorSets;
+    // std::vector<VkDescriptorSet> computeCulledBladesDescriptorSets;
+    // std::vector<VkDescriptorSet> computeNumBladesDescriptorSets;
+    std::vector<VkDescriptorSet> computeDescriptorSets;
+    std::vector<VkDescriptorSet> grassDescriptorSets;
 
     VkPipelineLayout graphicsPipelineLayout;
     VkPipelineLayout grassPipelineLayout;
@@ -84,3 +93,5 @@ private:
     std::vector<VkCommandBuffer> commandBuffers;
     VkCommandBuffer computeCommandBuffer;
 };
+
+
