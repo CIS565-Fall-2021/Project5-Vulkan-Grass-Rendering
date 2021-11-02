@@ -4,7 +4,7 @@
 #include <array>
 #include "Model.h"
 
-constexpr static unsigned int NUM_BLADES = 1 << 13;
+constexpr static unsigned int NUM_BLADES = 1 << 14;
 constexpr static float MIN_HEIGHT = 1.3f;
 constexpr static float MAX_HEIGHT = 2.5f;
 constexpr static float MIN_WIDTH = 0.1f;
@@ -12,7 +12,8 @@ constexpr static float MAX_WIDTH = 0.14f;
 constexpr static float MIN_BEND = 7.0f;
 constexpr static float MAX_BEND = 13.0f;
 
-struct Blade {
+struct Blade
+{
     // Position and direction
     glm::vec4 v0;
     // Bezier point and height
@@ -22,7 +23,8 @@ struct Blade {
     // Up vector and stiffness coefficient
     glm::vec4 up;
 
-    static VkVertexInputBindingDescription getBindingDescription() {
+    static VkVertexInputBindingDescription getBindingDescription()
+    {
         VkVertexInputBindingDescription bindingDescription = {};
         bindingDescription.binding = 0;
         bindingDescription.stride = sizeof(Blade);
@@ -31,7 +33,8 @@ struct Blade {
         return bindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
+    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions()
+    {
         std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions = {};
 
         // v0
@@ -62,14 +65,16 @@ struct Blade {
     }
 };
 
-struct BladeDrawIndirect {
+struct BladeDrawIndirect
+{
     uint32_t vertexCount;
     uint32_t instanceCount;
     uint32_t firstVertex;
     uint32_t firstInstance;
 };
 
-class Blades : public Model {
+class Blades : public Model
+{
 private:
     VkBuffer bladesBuffer;
     VkBuffer culledBladesBuffer;
@@ -80,7 +85,7 @@ private:
     VkDeviceMemory numBladesBufferMemory;
 
 public:
-    Blades(Device* device, VkCommandPool commandPool, float planeDim);
+    Blades(Device *device, VkCommandPool commandPool, float planeDim);
     VkBuffer GetBladesBuffer() const;
     VkBuffer GetCulledBladesBuffer() const;
     VkBuffer GetNumBladesBuffer() const;

@@ -28,29 +28,108 @@ struct Blade {
 
 // The project is using vkCmdDrawIndirect to use a buffer as the arguments for a draw call
 // This is sort of an advanced feature so we've showed you what this buffer should look like
-//
-// layout(set = ???, binding = ???) buffer NumBlades {
-// 	  uint vertexCount;   // Write the number of blades remaining here
-// 	  uint instanceCount; // = 1
-// 	  uint firstVertex;   // = 0
-// 	  uint firstInstance; // = 0
-// } numBlades;
+layout(set = 2, binding = 0) buffer Blades {
+	Blade data[];
+} bladeData;
+
+layout(set = 2, binding = 1) buffer CulledBlades {
+	Blade data[];
+} culledBladeData;
+
+layout(set = 2, binding = 2) buffer NumBlades {
+	  uint vertexCount;   // Write the number of blades remaining here
+ 	  uint instanceCount; // = 1
+ 	  uint firstVertex;   // = 0
+	  uint firstInstance; // = 0
+} numBlades;
 
 bool inBounds(float value, float bounds) {
     return (value >= -bounds) && (value <= bounds);
 }
 
+
 void main() {
+	float toler = 1.0;
+	float dmax = 40.0;
 	// Reset the number of blades to 0
 	if (gl_GlobalInvocationID.x == 0) {
-		// numBlades.vertexCount = 0;
+		numBlades.vertexCount = 0;
 	}
 	barrier(); // Wait till all threads reach this point
 
     // TODO: Apply forces on every blade and update the vertices in the buffer
+	int idx = int(gl_GlobalInvocationID.x);
+	vec4 d = vec4(0.0, -1.0, 0.0, 4.9); // gravity
+	vec3 envGrav = normalize(d.xyz) * d.w;
+	Blade b = bladeData.data[idx];
+	// vec3 frGrav = 0.25 * length(envGrav) * normalize(cross(bladeData.data[idx].up.xyz, bladeData.data[idx].v2.xyz - bladeData.data[idx].v1.xyz));
+	vec3 bladeOrient = vec3(cos(b.v0.w), 0.0, sin(b.v0.w)); 
+	vec3 frGrav = 0.25 * length(envGrav) * normalize(cross(bladeOrient, b.up.xyz));
+	vec3 totGrav = envGrav + frGrav;
+	vec3 restF = b.up.w * (b.v0.xyz + b.up.xyz - b.v2.xyz);
+	// float smallWind = deltaTime * totalTime;
+	// float smallWind = 2.0 * totalTime;
+	float smallWind = 0.5 * totalTime;
+	vec3 wind = 7.0 * vec3(cos(smallWind), 0, 0);
+	// vec3 wind = 7.0 * vec3(cos(smallWind), 0, sin(smallWind));
+	// vec3 wind = vec3(0.0);
+
+	vec4 v0 = b.v0;
+	vec4 v1 = b.v1;
+	vec4 v2 = b.v2;
+	vec4 up = b.up;
+	v2 = vec4(v2.xyz + deltaTime * (totGrav + restF + wind), v2.w);
+	v2 = vec4(v2.xyz - (up.xyz * min(dot(up.xyz, v2.xyz - v0.xyz), 0.0)), v2.w);
+	float lproj = length(v2.xyz - v0.xyz - up.xyz * dot(up.xyz, v2.xyz - v0.xyz));
+	v1 = vec4(v0.xyz + v1.w * up.xyz * max(1.0 - lproj / v1.w, 0.05 * max(lproj / v1.w, 1.0)), v1.w);
+	float approxL = 2 * length(v0.xyz - v2.xyz) +  (length(v0.xyz - v1.xyz) + length(v2.xyz - v1.xyz));
+	approxL = approxL / 3.0;
+	float ratio = v1.w / approxL;
+	vec3 oldv1 = v1.xyz;
+	v1 = vec4(v0.xyz + ratio * (v1.xyz - v0.xyz), v1.w);
+	v2 = vec4(v1.xyz + ratio * (v2.xyz - oldv1), v2.w);
+	bladeData.data[idx].v0 = v0;
+	bladeData.data[idx].v1 = v1;
+	bladeData.data[idx].v2 = v2;
+	bladeData.data[idx].up = up;
 
 	// TODO: Cull blades that are too far away or not in the camera frustum and write them
 	// to the culled blades buffer
 	// Note: to do this, you will need to use an atomic operation to read and update numBlades.vertexCount
 	// You want to write the visible blades to the buffer without write conflicts between threads
+	vec3 camEye = inverse(camera.view)[3].xyz;
+	float cam_grass_align = dot(bladeOrient, normalize(v0.xyz - camEye));
+	if (cam_grass_align > 0.9)
+	{
+		return;
+	}
+	vec4 m = 0.25 * v0 + 0.5 * v1 + 0.25 * v2;
+	mat4 viewproj = camera.proj * camera.view;
+	vec4 v0z = viewproj * v0;
+	vec4 midz = viewproj * vec4(m.xyz, 1.0);
+	vec4 v2z = viewproj * v2;
+	float v0h = toler + v0z.w;
+	float midh = toler + midz.w;
+	float v2h = toler + v2z.w;
+	bool keepV0 = (inBounds(v0z.x, v0h) && inBounds(v0z.y, v0h) && inBounds(v0z.z, v0h));
+	bool keepMid = (inBounds(midz.x, midh) && inBounds(midz.y, midh) && inBounds(midz.z, midh));
+	bool keepV2 = (inBounds(v2z.x, v2h) && inBounds(v2z.y, v2h) && inBounds(v2z.z, v2h));
+	if (!keepV0 && !keepMid && !keepV2)
+	{
+		return;
+	}
+	float dproj = length(v0.xyz - camEye - up.xyz * dot(up.xyz, v0.xyz - camEye));
+	int levels = 6;
+	if (mod(idx, levels) > floor(levels * (1.0 - (dproj / dmax))))
+	{
+		return;
+	}
+	
+	// atomicAdd(numBlades.vertexCount, 1);
+    // culledBladeData.data[numBlades.vertexCount] = bladeData.data[idx];
+    // culledBladeData.data[idx] = bladeData.data[idx];
+    // culledBladeData.data[idx] = b;
+	culledBladeData.data[atomicAdd(numBlades.vertexCount, 1)] = bladeData.data[idx];
 }
+
+

@@ -1,0 +1,5 @@
+bin/*
+build/*
+bin/Release/vulkan_grass_rendering.exe
+bin/*
+*.exe

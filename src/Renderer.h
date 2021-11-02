@@ -5,10 +5,11 @@
 #include "Scene.h"
 #include "Camera.h"
 
-class Renderer {
+class Renderer
+{
 public:
     Renderer() = delete;
-    Renderer(Device* device, SwapChain* swapChain, Scene* scene, Camera* camera);
+    Renderer(Device *device, SwapChain *swapChain, Scene *scene, Camera *camera);
     ~Renderer();
 
     void CreateCommandPools();
@@ -17,6 +18,7 @@ public:
 
     void CreateCameraDescriptorSetLayout();
     void CreateModelDescriptorSetLayout();
+    // void CreateGrassDescriptorSetLayout();
     void CreateTimeDescriptorSetLayout();
     void CreateComputeDescriptorSetLayout();
 
@@ -42,11 +44,11 @@ public:
     void Frame();
 
 private:
-    Device* device;
+    Device *device;
     VkDevice logicalDevice;
-    SwapChain* swapChain;
-    Scene* scene;
-    Camera* camera;
+    SwapChain *swapChain;
+    Scene *scene;
+    Camera *camera;
 
     VkCommandPool graphicsCommandPool;
     VkCommandPool computeCommandPool;
@@ -55,13 +57,24 @@ private:
 
     VkDescriptorSetLayout cameraDescriptorSetLayout;
     VkDescriptorSetLayout modelDescriptorSetLayout;
+    // VkDescriptorSetLayout grassDescriptorSetLayout;
     VkDescriptorSetLayout timeDescriptorSetLayout;
-    
+    VkDescriptorSetLayout computeDescriptorSetLayout;
+    // VkDescriptorSetLayout computeBladesDescriptorSetLayout;
+    // VkDescriptorSetLayout computeCulledBladesDescriptorSetLayout;
+    // VkDescriptorSetLayout computeNumBladesDescriptorSetLayout;
+
     VkDescriptorPool descriptorPool;
 
     VkDescriptorSet cameraDescriptorSet;
     std::vector<VkDescriptorSet> modelDescriptorSets;
+    // std::vector<VkDescriptorSet> grassDescriptorSets;
     VkDescriptorSet timeDescriptorSet;
+    // std::vector<VkDescriptorSet> computeBladesDescriptorSets;
+    // std::vector<VkDescriptorSet> computeCulledBladesDescriptorSets;
+    // std::vector<VkDescriptorSet> computeNumBladesDescriptorSets;
+    std::vector<VkDescriptorSet> computeDescriptorSets;
+    std::vector<VkDescriptorSet> grassDescriptorSets;
 
     VkPipelineLayout graphicsPipelineLayout;
     VkPipelineLayout grassPipelineLayout;
@@ -80,3 +93,5 @@ private:
     std::vector<VkCommandBuffer> commandBuffers;
     VkCommandBuffer computeCommandBuffer;
 };
+
+
