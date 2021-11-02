@@ -4,7 +4,7 @@
 #define WORKGROUP_SIZE 32
 
 // TODO: update definitions depending on desired result
-#define FORCE // Uncomment to simulate forces
+//#define FORCE // Uncomment to simulate forces
 #define WIND // Uncomment to simulate wind
 #define ORIENTATION_CULLING
 #define VIEW_FRUSTUM_CULLING
@@ -81,7 +81,8 @@ void main() {
     float stiffness = inputBlades[gl_GlobalInvocationID.x].up.w;
 
     vec3 m = 0.25 * v0 + 0.5 * v1 + 0.25 * v2;
-
+    vec3 eye = vec3(inverse(camera.view) * vec4(0.f, 0.f, 0.f, 1.f));
+    vec3 bitangent = vec3(cos(theta), 0, -sin(theta)); 
 
     // TODO: calculate forces
     vec3 recovery = vec3(0.0);
@@ -94,7 +95,6 @@ void main() {
 
     /** gravity */ 
     vec3 gE = vec3(0, -1, 0) * 9.80665f;
-    vec3 bitangent = vec3(cos(theta), 0, -sin(theta)); 
     vec3 norm = cross(up, bitangent);
     vec3 gF = 0.25f * length(gE) * norm;
 
@@ -150,7 +150,6 @@ void main() {
 
     // Orientation test
     #ifdef ORIENTATION_CULLING
-    vec3 eye = vec3(inverse(camera.view) * vec4(0.f, 0.f, 0.f, 1.f));
     vec3 dirC = eye - v0;
     float dotProd = abs(dot(normalize(dirC), normalize(bitangent)));
     
@@ -164,24 +163,21 @@ void main() {
     // TODO: verify this is working
     mat4 viewProj = camera.proj * camera.view;
     
-    vec4 normalizedV0 = viewProj * vec4(v0, 1.f);
-    vec4 normalizedM = viewProj * vec4(m, 1.f);
-    vec4 normalizedV2 = viewProj * vec4(v2, 1.f);
+    vec4 normalizedV0 = viewProj * vec4(v0, 1.f); normalizedV0 /= normalizedV0.w;
+    vec4 normalizedM = viewProj * vec4(m, 1.f); normalizedM /= normalizedM.w;
+    vec4 normalizedV2 = viewProj * vec4(v2, 1.f); normalizedV2 /= normalizedV2.w;
     
-    float tolerance = 0.01f; // TODO: need changing?
-    float toleranceV0 = normalizedV0.w  + tolerance;
-    float toleranceM = normalizedM.w + tolerance;
-    float toleranceV2 = normalizedV2.w + tolerance;
+    float tolerance = 0.1f; // TODO: need changing?
+    float toleranceV0 = 1 + tolerance;
+    float toleranceM = 1 + tolerance;
+    float toleranceV2 = 1 + tolerance;
 
-    bool v0Test = inBounds(normalizedV0.x, toleranceV0) && 
-                  inBounds(normalizedV0.y, toleranceV0) && 
-                  inBounds(normalizedV0.z, toleranceV0);
+    bool v0Test = inBounds(normalizedV0.x, toleranceV0) &&
+                  inBounds(normalizedV0.y, toleranceV0);
     bool MTest = inBounds(normalizedM.x, toleranceM) && 
-                  inBounds(normalizedM.y, toleranceM) && 
-                  inBounds(normalizedM.z, toleranceM);
-    bool v2Test = inBounds(normalizedV2.x, toleranceV2) && 
-                  inBounds(normalizedV2.y, toleranceV2) && 
-                  inBounds(normalizedV2.z, toleranceV2);
+                  inBounds(normalizedM.y, toleranceM); 
+    bool v2Test = inBounds(normalizedV2.x, toleranceV2) &&
+                  inBounds(normalizedV2.y, toleranceV2);
 
     if (!v0Test && !MTest && !v2Test)
         culled = true;
@@ -190,7 +186,7 @@ void main() {
     // Distance Test 
     #ifdef DISTANCE_CULLING
     float dProj = length(v0 - eye - up * dot((v0 - eye), up));
-    float dMax = 60.f; // TODO: find the ideal number
+    float dMax = 80.f; // TODO: find the ideal number
     uint id = gl_GlobalInvocationID.x;
     uint n = 10; // TODO: find the ideal number
 
