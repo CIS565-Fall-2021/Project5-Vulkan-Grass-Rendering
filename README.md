@@ -11,7 +11,8 @@ Vulkan Grass Rendering
 
 This project implements the simulation and rendering of grass in real-time using Vulkan based on the paper: [Responsive Real-Time Rendering for General 3D Scenes](https://www.cg.tuwien.ac.at/research/publications/2017/JAHRMANN-2017-RRTG/JAHRMANN-2017-RRTG-draft.pdf).
 
-![Screen Capture](img/recording.mp4)
+https://user-images.githubusercontent.com/77313916/139769346-15b2f672-7666-4ccd-a473-662d80589295.mp4
+
 
 The three main components of the project are the following:
 1. **Simulation**: Apply forces to the grass to provide dynamics.
