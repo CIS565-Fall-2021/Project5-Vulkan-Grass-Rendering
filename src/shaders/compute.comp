@@ -3,9 +3,9 @@
 
 #define WORKGROUP_SIZE 32
 
-#define ORIENTATION_CULL 0
-#define VIEW_FRUST_CULL 0
-#define DISTANCE_CULL 0
+#define ORIENTATION_CULL 1
+#define VIEW_FRUST_CULL 1
+#define DISTANCE_CULL 1
 
 layout(local_size_x = WORKGROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
 
@@ -134,7 +134,7 @@ void main() {
 
 #if VIEW_FRUST_CULL
     // View-frustum test
-    float tol = 8.f;
+    float tol = 20.f;
     vec3 md = 0.25 * v0_vec + 0.5 * v1_vec + 0.25 * v2_vec;
     mat4 VP = camera.proj * camera.view;
 
