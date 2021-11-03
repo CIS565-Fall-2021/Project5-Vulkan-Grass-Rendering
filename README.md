@@ -8,7 +8,8 @@ Vulkan Grass Rendering
 * Tested on: Windows 11, i7-8750H @ 2.20 GHz 20 GB, GTX 1070 8 GB
 
 # Overview
-![](img/videos/Overview.mp4)
+https://user-images.githubusercontent.com/12516225/139997820-71cbc941-aba7-4718-bdbc-8f8757408048.mp4
+
 
 This project involved implementing a grass rendered in Vulkan, based on the paper [Responsive Real-Time Grass Rendering for General 3D Scenes](https://www.cg.tuwien.ac.at/research/publications/2017/JAHRMANN-2017-RRTG/JAHRMANN-2017-RRTG-draft.pdf) by Jahrmann and Wimmer. There were three major components to this project, including rendering the grass, applying forces to control grass movement, and culling blades of grass to improve rendering frame rate when possible.
 
@@ -56,17 +57,17 @@ Three optimizations were added to increase the frame rate. Some were more effect
 ## Orientation Test
 If the viewing angle is perpendicular to the thin edge of the blade of grass, it will not be rendered. It would not be visible to the user anyways, due to its thinness.
 
-![](img/videos/OrientationCulling.mp4)
+https://user-images.githubusercontent.com/12516225/139998042-966158d1-739e-409d-adf4-dbe54419e8be.mp4
 
 ## View-Frustum Culling
 If a blade is out of the camera view, it will not be rendered. The algorithm used makes it a bit difficult to see the effect (which is a good thing, because we don't want to cull blades that we can see). I didn't directly use the algorithm in the paper; I had to turn off the check for culling in the z direction since it was causing blades to be culled when moving away from the grass patch--this should be the function of distance culling instead. For demo purposes, I have made the culling more extreme, as seen below.
 
-![](img/videos/ViewFrustumCulling.mp4)
+https://user-images.githubusercontent.com/12516225/139998198-82aa14ca-c9c7-4f3f-9a75-83df591833f1.mp4
 
 ## Distance Culling
 Distance culling only keeps blades that are within a certain distance to the camera. The maximum distance is divided into equally sized levels, where each level represents a radius away from the camera. Only some blades in each level are removed so that the effect looks more even.
 
-![](img/videos/DistanceCulling.mp4)
+https://user-images.githubusercontent.com/12516225/139998364-d1364819-6588-4683-af34-0bb173f33b4f.mp4
 
 # Performance Analysis
 All tests below were performed with the camera situated above the plane, at an angle. `r = 20.0, theta = 45.f, phi = -45.0`.
