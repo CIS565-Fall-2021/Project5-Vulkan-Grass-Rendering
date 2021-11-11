@@ -8,7 +8,7 @@ file(GLOB IMAGES
 
 foreach(IMAGE ${IMAGES})
     get_filename_component(fname ${IMAGE} NAME)
-    configure_file(${IMAGE} ${CMAKE_CURRENT_BINARY_DIR}/images/${fname} COPYONLY)
+    configure_file(${IMAGE} ${CMAKE_BINARY_DIR}/images/${fname} COPYONLY)
 endforeach()
 
 find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{VK_SDK_PATH}/Bin/ $ENV{VK_SDK_PATH}/Bin32/)
@@ -33,7 +33,7 @@ else(WIN32)
 endif(WIN32)
 
 foreach(SHADER_SOURCE ${SHADER_SOURCES})
-    set(SHADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/shaders)
+    set(SHADER_DIR ${CMAKE_BINARY_DIR}/shaders)
 
     get_filename_component(fname ${SHADER_SOURCE} NAME)
     add_custom_target(${fname}.spv
