@@ -1,5 +1,7 @@
 #include "Scene.h"
 
+#include <cstring>
+
 #include "BufferUtils.h"
 
 Scene::Scene(Device* device) : device(device) {
@@ -10,7 +12,7 @@ Scene::Scene(Device* device) : device(device) {
                             timeBuffer, timeBufferMemory);
   vkMapMemory(device->GetVkDevice(), timeBufferMemory, 0, sizeof(Time), 0,
               &mappedData);
-  memcpy(mappedData, &time, sizeof(Time));
+  std::memcpy(mappedData, &time, sizeof(Time));
 }
 
 const std::vector<Model*>& Scene::GetModels() const { return models; }
@@ -30,7 +32,7 @@ void Scene::UpdateTime() {
   time.deltaTime = nextDeltaTime.count();
   time.totalTime += time.deltaTime;
 
-  memcpy(mappedData, &time, sizeof(Time));
+  std::memcpy(mappedData, &time, sizeof(Time));
 }
 
 VkBuffer Scene::GetTimeBuffer() const { return timeBuffer; }
