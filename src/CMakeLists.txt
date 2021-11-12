@@ -45,7 +45,12 @@ foreach(SHADER_SOURCE ${SHADER_SOURCES})
     add_dependencies(vulkan_grass_rendering ${fname}.spv)
 endforeach()
 
-target_link_libraries(vulkan_grass_rendering ${ASSIMP_LIBRARIES} Vulkan::Vulkan glfw)
+target_link_libraries(vulkan_grass_rendering 
+  ${ASSIMP_LIBRARIES} 
+  Vulkan::Vulkan 
+  glfw
+  spdlog::spdlog_header_only
+)
 target_include_directories(vulkan_grass_rendering PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${GLM_INCLUDE_DIR}
