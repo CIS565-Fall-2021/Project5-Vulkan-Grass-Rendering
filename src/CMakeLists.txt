@@ -36,7 +36,11 @@ else(WIN32)
   target_link_libraries(vulkan_grass_rendering ${CMAKE_THREAD_LIBS_INIT})
 endif(WIN32)
 
+message(STATUS "Compiling shader sources:")
+
 foreach(SHADER_SOURCE ${SHADER_SOURCES})
+  message(STATUS "\t${SHADER_SOURCE}")
+  
   if (WIN32)
     set(SHADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/shaders)
   else(WIN32)
