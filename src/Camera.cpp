@@ -1,3 +1,4 @@
+#include <cstring>
 #include <iostream>
 
 #define GLM_FORCE_RADIANS
@@ -26,7 +27,7 @@ Camera::Camera(Device* device, float aspectRatio) : device(device) {
                             buffer, bufferMemory);
   vkMapMemory(device->GetVkDevice(), bufferMemory, 0,
               sizeof(CameraBufferObject), 0, &mappedData);
-  memcpy(mappedData, &cameraBufferObject, sizeof(CameraBufferObject));
+  std::memcpy(mappedData, &cameraBufferObject, sizeof(CameraBufferObject));
 }
 
 VkBuffer Camera::GetBuffer() const { return buffer; }
@@ -48,7 +49,7 @@ void Camera::UpdateOrbit(float deltaX, float deltaY, float deltaZ) {
 
   cameraBufferObject.viewMatrix = glm::inverse(finalTransform);
 
-  memcpy(mappedData, &cameraBufferObject, sizeof(CameraBufferObject));
+  std::memcpy(mappedData, &cameraBufferObject, sizeof(CameraBufferObject));
 }
 
 Camera::~Camera() {
