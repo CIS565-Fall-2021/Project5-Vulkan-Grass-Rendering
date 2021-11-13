@@ -11,7 +11,7 @@ Blades::Blades(Device* device, VkCommandPool commandPool, float planeDim)
   std::vector<Blade> blades;
   blades.reserve(NUM_BLADES);
 
-  for (int i = 0; i < NUM_BLADES; i++) {
+  for (unsigned int i = 0; i < NUM_BLADES; i++) {
     Blade currentBlade = Blade();
 
     glm::vec3 bladeUp(0.0f, 1.0f, 0.0f);
