@@ -8,11 +8,7 @@ file(GLOB IMAGES
 
 foreach(IMAGE ${IMAGES})
   get_filename_component(fname ${IMAGE} NAME)
-  if(WIN32)
-    configure_file(${IMAGE} ${CMAKE_CURRENT_BINARY_DIR}/images/${fname} COPYONLY)
-  else(WIN32)
-    configure_file(${IMAGE} ${CMAKE_BINARY_DIR}/images/${fname} COPYONLY)
-  endif(WIN32)
+  configure_file(${IMAGE} ${CMAKE_CURRENT_BINARY_DIR}/images/${fname} COPYONLY)
 endforeach()
 
 find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{VK_SDK_PATH}/Bin/ $ENV{VK_SDK_PATH}/Bin32/)
@@ -41,11 +37,7 @@ message(STATUS "Compiling shader sources:")
 foreach(SHADER_SOURCE ${SHADER_SOURCES})
   message(STATUS "\t${SHADER_SOURCE}")
   
-  if (WIN32)
-    set(SHADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/shaders)
-  else(WIN32)
-    set(SHADER_DIR ${CMAKE_BINARY_DIR}/shaders)
-  endif(WIN32)
+  set(SHADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/shaders)
 
   get_filename_component(fname ${SHADER_SOURCE} NAME)
   add_custom_target(${fname}.spv
@@ -67,6 +59,12 @@ target_include_directories(vulkan_grass_rendering PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${GLM_INCLUDE_DIR}
   ${STB_INCLUDE_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 InternalTarget("" vulkan_grass_rendering)
+
+configure_file (
+  "${CMAKE_CURRENT_SOURCE_DIR}/shader_config.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/shader_config.h"
+)

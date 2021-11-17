@@ -7,6 +7,7 @@
 #include "Renderer.h"
 #include "Scene.h"
 #include "Window.h"
+#include "shader_config.h"
 
 Device* device;
 SwapChain* swapChain;
@@ -117,9 +118,10 @@ int main() {
   VkImage grassImage;
   VkDeviceMemory grassImageMemory;
   Image::FromFile(
-      device, transferCommandPool, "images/grass.jpg", VK_FORMAT_R8G8B8A8_UNORM,
-      VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_SAMPLED_BIT,
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+      device, transferCommandPool,
+      (std::string(BUILD_DIRECTORY) + "/images/grass.jpg").c_str(),
+      VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
+      VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, grassImage, grassImageMemory);
 
   float planeDim  = 15.f;
