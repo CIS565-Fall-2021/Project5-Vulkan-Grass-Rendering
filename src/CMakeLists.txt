@@ -49,6 +49,19 @@ foreach(SHADER_SOURCE ${SHADER_SOURCES})
   add_dependencies(vulkan_grass_rendering ${fname}.spv)
 endforeach()
 
+target_compile_options(vulkan_grass_rendering
+  INTERFACE
+  $<$<CXX_COMPILER_ID:GNU>:
+  -Wall
+  -Werror>
+  $<$<CXX_COMPILER_ID:AppleClang>:
+  -Wall
+  -Werror>
+  $<$<CXX_COMPILER_ID:MSVC>:
+  /WX
+  /W4>
+)
+
 target_link_libraries(vulkan_grass_rendering 
   ${ASSIMP_LIBRARIES} 
   Vulkan::Vulkan 

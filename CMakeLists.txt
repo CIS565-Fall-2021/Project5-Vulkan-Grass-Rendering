@@ -50,13 +50,6 @@ function(InternalTarget folder target)
   endif()
 endfunction(InternalTarget)
 
-# Compiler specific stuff
-IF(MSVC)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /W4 /WX")
-ELSE(MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
-ENDIF(MSVC)
-
 IF(WIN32)
   # Nothing here (yet)
 ELSE(WIN32)
