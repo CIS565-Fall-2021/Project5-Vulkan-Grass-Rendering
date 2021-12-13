@@ -1,45 +1,45 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include <chrono>
+#include <glm/glm.hpp>
 
-#include "Model.h"
 #include "Blades.h"
+#include "Model.h"
 
 using namespace std::chrono;
 
 struct Time {
-    float deltaTime = 0.0f;
-    float totalTime = 0.0f;
+  float deltaTime = 0.0f;
+  float totalTime = 0.0f;
 };
 
 class Scene {
 private:
-    Device* device;
-    
-    VkBuffer timeBuffer;
-    VkDeviceMemory timeBufferMemory;
-    Time time;
-    
-    void* mappedData;
+  Device* device;
 
-    std::vector<Model*> models;
-    std::vector<Blades*> blades;
+  VkBuffer timeBuffer;
+  VkDeviceMemory timeBufferMemory;
+  Time time;
 
-high_resolution_clock::time_point startTime = high_resolution_clock::now();
+  void* mappedData;
+
+  std::vector<Model*> models;
+  std::vector<Blades*> blades;
+
+  high_resolution_clock::time_point startTime = high_resolution_clock::now();
 
 public:
-    Scene() = delete;
-    Scene(Device* device);
-    ~Scene();
+  Scene() = delete;
+  Scene(Device* device);
+  ~Scene();
 
-    const std::vector<Model*>& GetModels() const;
-    const std::vector<Blades*>& GetBlades() const;
-    
-    void AddModel(Model* model);
-    void AddBlades(Blades* blades);
+  const std::vector<Model*>& GetModels() const;
+  const std::vector<Blades*>& GetBlades() const;
 
-    VkBuffer GetTimeBuffer() const;
+  void AddModel(Model* model);
+  void AddBlades(Blades* blades);
 
-    void UpdateTime();
+  VkBuffer GetTimeBuffer() const;
+
+  void UpdateTime();
 };

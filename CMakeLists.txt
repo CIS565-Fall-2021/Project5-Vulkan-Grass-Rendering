@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.15)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 project(cis565_project4_vulkan_grass_rendering)
@@ -8,15 +8,16 @@ OPTION(USE_D2D_WSI "Build the project using Direct to Display swapchain" OFF)
 find_package(Vulkan REQUIRED)
 
 IF(WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_USE_PLATFORM_WIN32_KHR")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_USE_PLATFORM_WIN32_KHR")
 ELSE(WIN32)
-    find_package(Threads REQUIRED)
+  find_package(Threads REQUIRED)
 IF(USE_D2D_WSI)
-    MESSAGE("Using direct to display extension...")
-    add_definitions(-D_DIRECT2DISPLAY)
+  MESSAGE(STATUS "Vulkan: Using direct to display extension -D_DIRECT2DISPLAY...")
+  add_definitions(-D_DIRECT2DISPLAY)
 ELSE(USE_D2D_WSI)
-    find_package(XCB REQUIRED)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_USE_PLATFORM_XCB_KHR")
+  message(STATUS "Vulkan: Using default WSI -DVK_USE_PLATFORM_XCB_KHR...")
+  find_package(XCB REQUIRED)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_USE_PLATFORM_XCB_KHR")
 ENDIF(USE_D2D_WSI)
     # Todo : android?
 ENDIF(WIN32)
@@ -49,18 +50,18 @@ function(InternalTarget folder target)
   endif()
 endfunction(InternalTarget)
 
-# Compiler specific stuff
-IF(MSVC)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
-ENDIF(MSVC)
-
 IF(WIN32)
   # Nothing here (yet)
 ELSE(WIN32)
     link_libraries(${XCB_LIBRARIES} ${VULKAN_LIB})
 ENDIF(WIN32)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/")
+if(WIN32)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+else(WIN32)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+endif(WIN32)
+
 
 add_subdirectory(external)
 add_subdirectory(src)
