@@ -14,20 +14,14 @@ layout(location = 0) out vec4 outColor;
 void main() {
     
     // Lighting Parameters
-    vec3 lightColor = vec3(1.0, 1.0, 1.0);
-    vec3 albedo = vec3(0.0, 0.8, 0.0);
-    vec3 lightPos = vec3(0.0, 10.0, 0.0);
-
-    // Ambient Lighting
-    float ka = 0.2;
-    vec3 ambient = ka * lightColor;
+    vec3 albedo = vec3(0.1, 0.5, 0.0);
+    vec3 lightPos = vec3(0.0, 100.0, 0.0);
 
     // Diffuse Lighting
     vec3 l = normalize(lightPos - pos);
-    float kd = abs(dot(-n, l));
-    vec3 diffuse = kd * lightColor;
+    float lambert = max(dot(l, normalize(n)), 0.0);
 
-    vec3 result = (ambient + diffuse) * albedo;
+    vec3 result = albedo + lambert * vec3(0.3);
 
     outColor = vec4(result, 1.0);
 }
