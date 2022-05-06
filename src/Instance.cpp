@@ -350,6 +350,7 @@ Device* Instance::CreateDevice(QueueFlagBits requiredQueues, VkPhysicalDeviceFea
         throw std::runtime_error("Failed to create logical device");
     }
 
+    // NOTE: Retrieving the queue handles for each queue family. Will use the queues to submit graphics commands
     Device::Queues queues;
     for (unsigned int i = 0; i < requiredQueues.size(); ++i) {
         if (requiredQueues[i]) {

@@ -1,4 +1,5 @@
 #include <vulkan/vulkan.h>
+#include <sstream>
 #include "Instance.h"
 #include "Window.h"
 #include "Renderer.h"
@@ -67,18 +68,21 @@ namespace {
 
 int main() {
     static constexpr char* applicationName = "Vulkan Grass Rendering";
-    InitializeWindow(640, 480, applicationName);
+    InitializeWindow(1280, 960, applicationName);
 
     unsigned int glfwExtensionCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
+    
+    //NOTE: First thing is to create an instance -> connection between application and the Vulkan library
     Instance* instance = new Instance(applicationName, glfwExtensionCount, glfwExtensions);
 
+    //NOTE: Connection between Vulkan and the windows system to present result to the screen
     VkSurfaceKHR surface;
     if (glfwCreateWindowSurface(instance->GetVkInstance(), GetGLFWWindow(), nullptr, &surface) != VK_SUCCESS) {
         throw std::runtime_error("Failed to create window surface");
     }
 
+    //NOTE: Need to select a physical GPU device to use
     instance->PickPhysicalDevice({ VK_KHR_SWAPCHAIN_EXTENSION_NAME }, QueueFlagBit::GraphicsBit | QueueFlagBit::TransferBit | QueueFlagBit::ComputeBit | QueueFlagBit::PresentBit, surface);
 
     VkPhysicalDeviceFeatures deviceFeatures = {};
@@ -86,8 +90,10 @@ int main() {
     deviceFeatures.fillModeNonSolid = VK_TRUE;
     deviceFeatures.samplerAnisotropy = VK_TRUE;
 
+    //NOTE: Create the logical device here and connecting to the physical device
     device = instance->CreateDevice(QueueFlagBit::GraphicsBit | QueueFlagBit::TransferBit | QueueFlagBit::ComputeBit | QueueFlagBit::PresentBit, deviceFeatures);
 
+    //NOTE: Swap chain is essentially a queue of images that are waiting to be presented to the screen
     swapChain = device->CreateSwapChain(surface, 5);
 
     camera = new Camera(device, 640.f / 480.f);
@@ -129,6 +135,7 @@ int main() {
     );
     plane->SetTexture(grassImage);
     
+    // NOTE: Blades class contains ALL blades (i.e. vector is contained within the class)
     Blades* blades = new Blades(device, transferCommandPool, planeDim);
 
     vkDestroyCommandPool(device->GetVkDevice(), transferCommandPool, nullptr);
@@ -138,15 +145,38 @@ int main() {
     scene->AddBlades(blades);
 
     renderer = new Renderer(device, swapChain, scene, camera);
+    
+    GLFWwindow* window = GetGLFWWindow();
+    glfwSetWindowSizeCallback(window, resizeCallback);
+    glfwSetMouseButtonCallback(window, mouseDownCallback);
+    glfwSetCursorPosCallback(window, mouseMoveCallback);
 
-    glfwSetWindowSizeCallback(GetGLFWWindow(), resizeCallback);
-    glfwSetMouseButtonCallback(GetGLFWWindow(), mouseDownCallback);
-    glfwSetCursorPosCallback(GetGLFWWindow(), mouseMoveCallback);
+    double fps = 0;
+    double timebase = 0;
+    int frame = 0;
 
     while (!ShouldQuit()) {
+
         glfwPollEvents();
+
+        frame++;
+        double time = glfwGetTime();
+
+        if (time - timebase > 1.0) {
+          fps = frame / (time - timebase);
+          timebase = time;
+          frame = 0;
+        }
+
         scene->UpdateTime();
         renderer->Frame();
+
+        std::ostringstream ss;
+        ss << "[";
+        ss.precision(1);
+        ss << std::fixed << fps;
+        ss << " fps] " << applicationName;
+        glfwSetWindowTitle(window, ss.str().c_str());
     }
 
     vkDeviceWaitIdle(device->GetVkDevice());
