@@ -1,6 +1,7 @@
 #include "SwapChain.h"
 
 #include <algorithm>
+#include <limits>
 #include <vector>
 
 #include "Device.h"
@@ -131,8 +132,8 @@ void SwapChain::Create() {
     createInfo.imageSharingMode      = VK_SHARING_MODE_CONCURRENT;
     createInfo.queueFamilyIndexCount = 2;
     unsigned int indices[]           = {
-        static_cast<unsigned int>(queueFamilyIndices[QueueFlags::Graphics]),
-        static_cast<unsigned int>(queueFamilyIndices[QueueFlags::Present])};
+                  static_cast<unsigned int>(queueFamilyIndices[QueueFlags::Graphics]),
+                  static_cast<unsigned int>(queueFamilyIndices[QueueFlags::Present])};
     createInfo.pQueueFamilyIndices = indices;
   } else {
     // An image is owned by one queue family at a time and ownership must be
